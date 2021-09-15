@@ -18,6 +18,9 @@ server.get('/', (request, response) => {
 
 })
 
+//access req.body
+server.use(express.json());
+
 // mongodb
 const mongoose = require('mongoose');
 
@@ -25,7 +28,8 @@ let bookMod;
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/Books');
+  // await mongoose.connect('mongodb://localhost:27017/Books');
+  await mongoose.connect(process.env.MONGO_URL);
    
   const  bookschema= new mongoose.Schema({
     title:String,
@@ -65,9 +69,13 @@ async function seedData(){
   await  Book3.save();
 
 }
-
+//Routes
 server.get('/books',getBookHandler);
+server.post('/addBook',addBookHandler);
+// server.delete('/deleteBook/:id',deleteBookHandler);
 
+
+// Handlers Functions 
 function getBookHandler(req,res){
   //send book list (email)
   const email=req.query.email;
@@ -80,6 +88,55 @@ bookMod.find({authoremail:email},(err,result) =>{
   }
 })
 }
+
+async function addBookHandler(req,res){
+  console.log(req.body);
+  // const catName = req.body.catName;
+  // const catBreed = req.body.catBreed;
+  // const ownerEmail = req.body.ownerEmail;
+  const {title, description, status,authoremail} = req.body;
+  await   bookMod.create({ 
+    title: title,
+    description: description,
+    status:status,
+    authoremail:authoremail
+  });
+
+  // await KittenModel.create({catName,catBreed,ownerEmail});
+
+  bookMod.find({authoremail:authoremail},(err,result)=>{
+      if(err)
+      {
+          console.log(err);
+      }
+      else
+      {
+          res.send(result);
+      }
+  })
+
+}
+
+// function deleteBookHandler(req,res){
+//   const bookId = req.params.id;
+//   const email = req.query.email;
+//   bookMod.deleteOne({_id:bookId},(err,result)=>{
+      
+//     bookMod.find({authoremail:email},(err,result)=>{
+//           if(err)
+//           {
+//               console.log(err);
+//           }
+//           else
+//           {
+//               res.send(result);
+//           }
+//       })
+
+//   })
+
+
+// }
 
 
 
