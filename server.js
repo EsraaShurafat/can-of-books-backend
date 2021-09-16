@@ -73,6 +73,7 @@ async function seedData(){
 server.get('/books',getBookHandler);
 server.post('/addBook',addBookHandler);
 server.delete('/deleteBook/:id',deleteBookHandler);
+server.put('/updateBook/:id',updateBookHandler);
 
 
 // Handlers Functions 
@@ -136,6 +137,25 @@ function deleteBookHandler(req,res){
   })
 
 
+}
+
+
+function updateBookHandler(req,res) {
+  const id = req.params.id;
+  const {title, description,email} = req.body;
+  
+  bookMod.findByIdAndUpdate(id,{title,description},(err,result)=>{
+    bookMod.find({authoremail:email},(err,result)=>{
+          if(err)
+          {
+              console.log(err);
+          }
+          else
+          {
+              res.send(result);
+          }
+      })
+  })
 }
 
 
